@@ -181,6 +181,7 @@ equation
   P = tau*w;
   h_out = h_in + w_t;
   eta_is = if noEvent( P >= P_reg) then dp*V_flow/P else 0;
+  Xi_out = Xi_in;
   w_t = P/max(m_flow,m_flow_reg);
   annotation (Icon(graphics={
         Text(visible=displayInstanceName,
