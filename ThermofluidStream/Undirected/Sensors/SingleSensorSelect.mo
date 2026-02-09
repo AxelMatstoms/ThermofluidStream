@@ -48,12 +48,12 @@ model SingleSensorSelect "Selectable sensor"
         transformation(extent={{70,50},{90,70}}),
           iconTransformation(extent={{70,50},{90,70}})));
 
-  function getQuantity = ThermofluidStream.Sensors.Internal.getQuantity (
-    redeclare package Medium = Medium) "Quantity compute function"
-    annotation (Documentation(info="<html>
-      <p>This function computes the selected quantity from state. r and rho_min are neddet for the quantities r/p_total and v respectively.</p>
-      </html>"));
 
+  ThermofluidStream.Sensors.Internal.GetQuantity getQuantity(redeclare package Medium=Medium, quantity=quantity, rho_min=rho_min) "Quantity compute function"
+    annotation (Documentation(info="<html>
+      <p>This block computes the selected quantity from state. r and rho_min are needed for the quantities r/p_total and v respectively.</p>
+      </html>"));
+  
   Real value(unit=ThermofluidStream.Sensors.Internal.getUnit(quantity));
 
 protected
@@ -69,7 +69,11 @@ initial equation
 
 equation
 
-  direct_value = getQuantity(state, rear.r, quantity, rho_min);
+  //direct_value = getQuantity(state, rear.r, quantity, rho_min);
+  getQuantity.r = rear.r;
+  getQuantity.state = state;
+  direct_value = getQuantity.value;
+  
 
   if filter_output then
     der(value) * TC = direct_value-value;

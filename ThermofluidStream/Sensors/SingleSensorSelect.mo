@@ -14,7 +14,7 @@ model SingleSensorSelect "Selectable sensor"
   parameter Integer digits(min=0) = 1 "Number of displayed digits";
   parameter SI.Density rho_min = dropOfCommons.rho_min "Minimum density"
     annotation(Dialog(tab="Advanced", group="Regularization"));
-  parameter Quantities quantity "Measured quantity";
+  parameter Quantities quantity "Measured quantity" annotation(Evaluate = true);
 
   final parameter String quantityString=
   if quantity == ThermofluidStream.Sensors.Internal.Types.Quantities.T_K then "T in K"
@@ -57,9 +57,9 @@ model SingleSensorSelect "Selectable sensor"
 protected
   Real direct_value(unit=Internal.getUnit(quantity));
 
-  function getQuantity = Internal.getQuantity(redeclare package Medium=Medium) "Quantity compute function"
+  Internal.GetQuantity getQuantity(redeclare package Medium=Medium, quantity=quantity, rho_min=rho_min) "Quantity compute function"
     annotation (Documentation(info="<html>
-      <p>This function computes the selected quantity from state. r and rho_min are neddet for the quantities r/p_total and v respectively.</p>
+      <p>This block computes the selected quantity from state. r and rho_min are needed for the quantities r/p_total and v respectively.</p>
       </html>"));
 
 initial equation
@@ -70,8 +70,11 @@ initial equation
   end if;
 
 equation
+  getQuantity.r = inlet.r;
+  getQuantity.state = inlet.state;
+
   inlet.m_flow = 0;
-  direct_value = getQuantity(inlet.state, inlet.r, quantity, rho_min);
+  direct_value = getQuantity.value;
 
   if filter_output then
     der(value) * TC = direct_value-value;
